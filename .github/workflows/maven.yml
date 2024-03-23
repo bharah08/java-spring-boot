@@ -1,0 +1,42 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@master
+      with:
+        projectBaseDir: .
+        args: >
+          -Dsonar.organization=my-org
+          -Dsonar.projectKey=my-Java-web-app
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    
+    - name: unit-test
+      run: |
+        PATH="/opt/apache-maven-3.6.3/bin:$PATH"
+        mvn clean test
+    - name: package
+      run: |
+        PATH="/opt/apache-maven-3.6.3/bin:$PATH"
+        mvn clean install
+    - name: build docker image
+      run: docker build -t bharath0812/java:1.0 .
+    - name: image scan with trivy
+      run: trivy image bharath0812/java:1.0 > trivy.txt
+    - name: docker image push to dockerhub
+      run: |
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker push bharath0812/java:1.0
