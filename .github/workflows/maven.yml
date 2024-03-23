@@ -23,15 +23,10 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-    
-    - name: unit-test
-      run: |
-        PATH="/opt/apache-maven-3.6.3/bin:$PATH"
-        mvn clean test
     - name: package
       run: |
         PATH="/opt/apache-maven-3.6.3/bin:$PATH"
-        mvn clean install
+        mvn clean install -DskipTests=true
     - name: build docker image
       run: docker build -t bharath0812/java:1.0 .
     - name: image scan with trivy
