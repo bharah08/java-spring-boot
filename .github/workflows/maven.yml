@@ -17,14 +17,8 @@ jobs:
       run: |
         PATH="/opt/apache-maven-3.6.3/bin:$PATH"
         mvn clean install -DskipTests=true
-    - name: Nexus Repo Publish
-      uses: sonatype-nexus-community/nexus-repo-github-action@master
-      with:
-        serverUrl: ${{ secrets.NEXUS_URL }}
-        username: ${{ secrets.NEXUS_USERNAME }}
-        password: ${{ secrets.NEXUS_PASSWORD }}
-        format: maven2
-        repository: web-app
-        coordinates: groupId=course artifactId=spring-course version=1.0
-        assets: extension=jar
-        filename: ./target/*.jar
+    - name: docker image build
+      run: |
+        docker build -t 20.193.156.188:8085/first-img:1.0 .
+        docker login -u admin 20.193.156.188:8085 -p ${{ secrets.NEXUS_PASSWORD }}
+        docker push 20.193.156.188:8085/first-img:1.0
